@@ -1,0 +1,130 @@
+********************BookingFlight.apxc********************
+public class BookingFlight{ 
+    public String passengerName {get; set;} 
+    public String phoneNumber {get; set;} 
+    public String selectedFlight {get; set;}
+    public Date departureDate {get; set;}
+    public Date returnDate {get; set;}
+    public String seatPreference {get; set;}
+    public List<SelectOption> flightOptions {get; set;} 
+    public List<SelectOption> seatOptions {get; set;}
+    public Boolean isVegetarian {get; set;}
+    public Boolean isNonVegetarian {get; set;}
+     
+    public BookingFlight(ApexPages.StandardController controller) { 
+        flightOptions = new List<SelectOption>(); 
+        flightOptions.add(new SelectOption('','- Select Flight -')); 
+        flightOptions.add(new SelectOption('AI101','AI101 - Delhi to Mumbai (Domestic)')); 
+        flightOptions.add(new SelectOption('AI202','AI202 - Mumbai to Chennai (Domestic)')); 
+        flightOptions.add(new SelectOption('AI303','AI303 - Chennai to Kolkata (Domestic)')); 
+        flightOptions.add(new SelectOption('AI404','AI404 - Kolkata to Delhi (Domestic)')); 
+        flightOptions.add(new SelectOption('UA101','UA101 - New York to Los Angeles (International)')); 
+        flightOptions.add(new SelectOption('UA202','UA202 - Los Angeles to Chicago (International)')); 
+        flightOptions.add(new SelectOption('UA303','UA303 - Chicago to Miami (International)')); 
+        flightOptions.add(new SelectOption('UA404','UA404 - Miami to New York (International)')); 
+
+        seatOptions = new List<SelectOption>();
+        seatOptions.add(new SelectOption('',''));
+        seatOptions.add(new SelectOption('Business','Business Class'));
+        seatOptions.add(new SelectOption('Economy','Economy Class'));
+        seatOptions.add(new SelectOption('FirstClass','First Class'));
+    } 
+ 
+    public PageReference bookFlight() { 
+        if (!String.isEmpty(passengerName) && !String.isEmpty(selectedFlight)) { 
+            Account accountRecord = new Account(
+                Name = passengerName, 
+                Phone = phoneNumber,
+                selected_Flight__c = selectedFlight,
+                // Industry = selectedFlight,
+                date_of_departure__c = Date.valueOf(departureDate),
+                date_of_return__c = Date.valueOf(returnDate),
+                Seat_Preference__c = seatPreference
+            ); 
+            if(isVegetarian) {
+                accountRecord.Type = 'Vegetarian';
+            }
+            if(isNonVegetarian) {
+                accountRecord.Type = 'Non-Vegetarian';
+            }
+            INSERT accountRecord; 
+             
+            PageReference pg = new PageReference('/'+accountRecord.Id); 
+            pg.setRedirect(true); 
+            return pg;   
+        } else { 
+            ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.CONFIRM,'Please fill in all required fields')); 
+        } 
+        return null; 
+    } 
+ 
+    public PageReference cancelBooking() {            
+        PageReference pg = new PageReference('/'+Schema.SObjectType.Account.getKeyPrefix()+'/o'); 
+        return pg; 
+    } 
+}
+
+
+
+
+***********************BookingFlight.vfp*******************************
+<apex:page standardController="Account" extensions="BookingFlight" docType="html-5.0"> 
+    <style>
+        .center {
+            margin: auto;
+            width: 50%;
+            padding: 20px;
+            text-align: center;
+        }
+        .form-container {
+            background-color: #f2f2f2;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .button-container {
+            margin-top: 20px;
+        }
+        .btn-book, .btn-cancel {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .btn-book:hover, .btn-cancel:hover {
+            background-color: #0056b3;
+        }
+    </style>
+    <apex:form id="apexForm" styleClass="center"> 
+        <div class="form-container">
+            <apex:pageBlock title="Book a Flight:" id="pageBlockId"> 
+                <apex:pageMessages id="showmsg"></apex:pageMessages> 
+                <apex:outputPanel layout="block" style="text-align:center">
+                    <h2>Flight Book</h2>
+                    <h3>Customer Information</h3>
+                </apex:outputPanel>
+                <apex:pageBlockSection columns="2"> 
+                    <apex:inputText value="{!passengerName}" label="Passenger Name" required="true"/> 
+                    <apex:inputText value="{!phoneNumber}" label="Phone" /> 
+                    <apex:selectList size="1" value="{!selectedFlight}" label="Flight"> 
+                        <apex:selectOptions value="{!flightOptions}"/> 
+                    </apex:selectList> 
+                    <apex:input type="date" value="{!departureDate}" label="Departure Date" /> 
+                    <apex:input type="date" value="{!returnDate}" label="Return Date" />
+                    <apex:selectList size="1" value="{!seatPreference}" label="Seat Preference"> 
+                        <apex:selectOptions value="{!seatOptions}"/> 
+                    </apex:selectList>
+                    <apex:inputCheckbox value="{!isVegetarian}" label="Vegetarian" />
+                    <apex:inputCheckbox value="{!isNonVegetarian}" label="Non-Vegetarian" />
+                </apex:pageBlockSection>
+                <div class="button-container">
+                    <apex:commandButton styleClass="btn-book" action="{!bookFlight}" value="Book"/>   
+                    <apex:commandButton styleClass="btn-cancel" action="{!cancelBooking}" value="Cancel"/> 
+                </div>  
+            </apex:pageBlock>
+        </div>   
+    </apex:form> 
+</apex:page>

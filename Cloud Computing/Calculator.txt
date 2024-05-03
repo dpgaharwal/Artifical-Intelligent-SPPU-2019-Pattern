@@ -1,0 +1,84 @@
+********************************nPr.apxc***********************
+public class nPr {
+    public Decimal n { get; set; }
+    public Decimal r { get; set; }
+    public Decimal permutationResult { get; set; }
+    public Boolean showResult { get; set; }
+ 
+    public nPr() {
+        n = 0;
+        r = 0;
+        permutationResult = 0;
+        showResult = false;
+    }
+    
+    public void resetInputs() {
+    n = 0;
+    r = 0;
+    showResult = false;
+	}
+
+    public void calculatePermutation() {
+        // Calculate nPr using the formula: n! / (n - r)!
+        permutationResult = factorial(n) / factorial(n - r);
+        showResult = true;
+    }
+    
+    // Method to calculate factorial
+    private Decimal factorial(Decimal num) {
+        Decimal result = 1;
+        while (num > 0) {
+            result *= num;
+            num -= 1;
+        }
+        return result;
+    }
+}
+
+
+****************************nPr.vfp*****************************
+<apex:page controller="nPr">
+    <apex:form id="form">
+        <apex:pageBlock title="Calculate Permutation (nPr)">
+            <apex:pageBlockSection title="Permutation Parameters">
+                <apex:inputText value="{!n}" label="n" styleClass="coordinate-input"/>
+                <apex:inputText value="{!r}" label="r" styleClass="coordinate-input"/>
+            </apex:pageBlockSection>
+            <div style="text-align: center;" class="calculate-button">
+                <center>
+                    <apex:commandButton action="{!calculatePermutation}" value="Calculate" rerender="resultPanel" styleClass="calculate-button"/>
+                    <apex:commandButton action="{!resetInputs}" value="Reset" rerender="form" styleClass="calculate-button"/>
+                </center>
+            </div>
+        </apex:pageBlock>
+
+        <apex:outputPanel id="resultPanel">
+            <apex:outputPanel rendered="{!showResult}">
+                <apex:pageBlock title="Permutation Result">
+                    <apex:outputPanel layout="block" style="margin: 10px;">
+                        <div>
+                            The permutation result (nPr) is: {!permutationResult}
+                        </div>
+                    </apex:outputPanel>
+                </apex:pageBlock>
+            </apex:outputPanel>
+        </apex:outputPanel>
+    </apex:form>
+
+    <style>
+        .coordinate-input {
+            width: 50px;
+        }
+        .calculate-button {
+            margin-top: 10px;
+        }
+    </style>
+    <script>
+        function resetInputs() {
+            var inputs = document.querySelectorAll('.coordinate-input');
+            inputs.forEach(function(input) {
+                input.value = '';
+            });
+        }
+    </script>
+</apex:page>
